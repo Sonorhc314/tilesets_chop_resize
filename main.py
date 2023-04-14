@@ -3,7 +3,7 @@ from PIL import Image
 
 # Define the path to the folder containing the images
 # folder_path = "../../../Desktop/player/NinjaAdventure/Backgrounds/Vehicles"
-folder_path = "../witchling/graphics/map"
+folder_path = "../witchling/graphics/items/flowers"
 # ==================================================================
 # uses resample=Image.NEAREST to keep the resolution of pixel art
 # ===================================================================
@@ -62,3 +62,38 @@ def resize(folder_path, scale_by):
             image_filename = f"{filename[0:-4]}_{scale_by}.png"
             image_path = os.path.join(folder_path, image_filename)
             image.save(image_path)
+
+
+def create_tileset_from_folder(folder_path):
+    # Get a list of all PNG images in the folder
+    image_paths = [
+        os.path.join(folder_path, f)
+        for f in os.listdir(folder_path)
+        if f.endswith(".png")
+    ]
+
+    # Calculate the number of tiles and rows in the final tileset image
+    num_tiles = len(image_paths)
+    num_rows = (num_tiles + 9) // 10  # Maximum of 10 tiles per row
+
+    # Calculate the final width and height of the tileset image
+    final_width = min(num_tiles * 16, 160)
+    final_height = num_rows * 16
+
+    # Create a new image object to hold the tileset
+    tileset = Image.new(
+        mode="RGBA", size=(final_width, final_height), color=(0, 0, 0, 0)
+    )
+
+    # Paste the individual tile images onto the tileset
+    for i, path in enumerate(image_paths):
+        x_offset = (i % 10) * 16
+        y_offset = (i // 10) * 16
+        tile = Image.open(path).convert("RGBA")
+        tileset.paste(tile, box=(x_offset, y_offset))
+
+    # Save the tileset image
+    tileset.save(os.path.join(folder_path, "tileset.png"))
+
+
+create_tileset_from_folder(folder_path)
